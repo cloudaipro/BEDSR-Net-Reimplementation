@@ -10,7 +10,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
-
+from libs.device import get_device
 from .meter import AverageMeter, ProgressMeter
 from .metric import calc_psnr, calc_ssim
 from .visualize_grid import make_grid, unnormalize
@@ -23,6 +23,7 @@ __all__ = ["train", "evaluate"]
 
 logger = getLogger(__name__)
 
+device = get_device(allow_only_gpu=False)
 
 def set_requires_grad(nets, requires_grad=False):
     for net in nets:
@@ -69,7 +70,8 @@ def do_one_iteration(
 
     Tensor = (
         torch.cuda.FloatTensor  # type: ignore
-        if device != torch.device("cpu")
+        # alex if device != torch.device("cpu")
+        if device == "cuda"
         else torch.FloatTensor
     )
 
@@ -116,7 +118,6 @@ def do_one_iteration(
 
     label_D_fake = Variable(Tensor(np.zeros(out_D_fake.size())), requires_grad=True)
     label_D_real = Variable(Tensor(np.ones(out_D_fake.size())), requires_grad=True)
-
     
 
     loss_D_fake = criterion[1](out_D_fake, label_D_fake)
@@ -219,8 +220,9 @@ def train(
     discriminator.train()
 
     target_layers = [benet.features[3]]
-    grad_cam = GradCAM(model=benet, target_layers=target_layers, use_cuda=True)
 
+    grad_cam = GradCAM(model=benet, target_layers=target_layers, use_cuda=(True if device == "cuda" else False))   # alex use_cuda=False)
+    # alex grad_cam = GradCAM(model=benet, target_layers=target_layers, use_cuda=True)
     end = time.time()
     for i, sample in enumerate(tqdm(loader)):
         # measure data loading time
@@ -312,7 +314,7 @@ def evaluate(
     discriminator.eval()
 
     target_layers = [benet.features[3]]
-    grad_cam = GradCAM(model=benet, target_layers=target_layers, use_cuda=True)
+    grad_cam = GradCAM(model=benet, target_layers=target_layers, use_cuda=(True if device == "cuda" else False))  # alex use_cuda=False)
 
     with torch.no_grad():
         for sample in tqdm(loader):
@@ -380,7 +382,7 @@ def infer(
     discriminator.eval()
 
     target_layers = [benet.features[3]]
-    grad_cam = GradCAM(model=benet, target_layers=target_layers, use_cuda=True)
+    grad_cam = GradCAM(model=benet, target_layers=target_layers, use_cuda=(True if device == "cuda" else False))  # alex use_cuda=True)
 
     with torch.no_grad():
         for sample in tqdm(loader):

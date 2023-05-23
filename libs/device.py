@@ -9,6 +9,10 @@ def get_device(allow_only_gpu: bool = True) -> str:
     if torch.cuda.is_available():
         device = "cuda"
         torch.backends.cudnn.benchmark = True
+    elif torch.backends.mps.is_available():
+        if torch.backends.cudnn.is_available():
+            torch.backends.cudnn.benchmark = True
+        device = "mps"
     else:
         if allow_only_gpu:
             message = (

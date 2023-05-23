@@ -3,16 +3,18 @@ from typing import Any, Callable
 
 import torch
 import torch.nn as nn
-
+from libs.device import get_device
 from .cam import GradCAM
 from .fix_weight_dict import fix_model_state_dict
+
+device = get_device(allow_only_gpu=False)
 
 
 def weights_init(init_type="gaussian") -> Callable:
     def init_fun(m):
         classname = m.__class__.__name__
         if (classname.find("Conv") == 0 or classname.find("Linear") == 0) and hasattr(
-            m, "weight"
+                m, "weight"
         ):
             if init_type == "gaussian":
                 nn.init.normal_(m.weight, 0.0, 0.02)
@@ -54,17 +56,17 @@ class BENet(nn.Module):
 
 class Cvi(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        before: str = None,
-        after: str = None,
-        kernel_size: int = 4,
-        stride: int = 2,
-        padding: int = 1,
-        dilation: int = 1,
-        groups: int = 1,
-        bias: bool = False,
+            self,
+            in_channels: int,
+            out_channels: int,
+            before: str = None,
+            after: str = None,
+            kernel_size: int = 4,
+            stride: int = 2,
+            padding: int = 1,
+            dilation: int = 1,
+            groups: int = 1,
+            bias: bool = False,
     ) -> None:
         super(Cvi, self).__init__()
         self.conv = nn.Conv2d(
@@ -107,17 +109,17 @@ class Cvi(nn.Module):
 
 class CvTi(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        before: str = None,
-        after: str = None,
-        kernel_size: int = 4,
-        stride: int = 2,
-        padding: int = 1,
-        dilation: int = 1,
-        groups: int = 1,
-        bias: bool = False,
+            self,
+            in_channels: int,
+            out_channels: int,
+            before: str = None,
+            after: str = None,
+            kernel_size: int = 4,
+            stride: int = 2,
+            padding: int = 1,
+            dilation: int = 1,
+            groups: int = 1,
+            bias: bool = False,
     ) -> None:
         super(CvTi, self).__init__()
         self.after: Any[Callable]
@@ -242,7 +244,7 @@ class Discriminator(nn.Module):
 def benet(pretrained: bool = False, **kwargs: Any) -> BENet:
     model = BENet(**kwargs)
     if pretrained:
-        state_dict = torch.load("./pretrained/pretrained_benet.prm")  # map_location
+        state_dict = torch.load("./pretrained/pretrained_benet.prm", map_location=torch.device(device))  # map_location
         model.load_state_dict(fix_model_state_dict(state_dict))
     return model
 
@@ -250,7 +252,7 @@ def benet(pretrained: bool = False, **kwargs: Any) -> BENet:
 def cam_benet(pretrained: bool = False, **kwargs: Any) -> GradCAM:
     model = BENet(**kwargs)
     if pretrained:
-        state_dict = torch.load("./pretrained/pretrained_benet.prm")  # map_location
+        state_dict = torch.load("./pretrained/pretrained_benet.prm", map_location=torch.device(device))  # map_location
         model.load_state_dict(fix_model_state_dict(state_dict))
     model.eval()
     target_layer = model.features[3]
@@ -261,7 +263,7 @@ def cam_benet(pretrained: bool = False, **kwargs: Any) -> GradCAM:
 def generator(pretrained: bool = False, **kwargs: Any) -> Generator:
     model = Generator(**kwargs)
     if pretrained:
-        state_dict = torch.load("./pretrained/pretrained_g_srnet.prm")
+        state_dict = torch.load("./pretrained/pretrained_g_srnet.prm", map_location=torch.device(device))
         model.load_state_dict(fix_model_state_dict(state_dict))
     return model
 
@@ -269,6 +271,6 @@ def generator(pretrained: bool = False, **kwargs: Any) -> Generator:
 def discriminator(pretrained: bool = False, **kwargs: Any) -> Discriminator:
     model = Discriminator(**kwargs)
     if pretrained:
-        state_dict = torch.load("./pretrained/pretrained_d_srnet.prm")
+        state_dict = torch.load("./pretrained/pretrained_d_srnet.prm", map_location=torch.device(device))
         model.load_state_dict(fix_model_state_dict(state_dict))
     return model

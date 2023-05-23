@@ -12,7 +12,7 @@ class SaveValues:
         self.activations = None
         self.gradients = None
         self.forward_hook = m.register_forward_hook(self.hook_fn_act)
-        self.backward_hook = m.register_backward_hook(self.hook_fn_grad)
+        self.backward_hook = m.register_full_backward_hook(self.hook_fn_grad)  # alex register_backward_hook(self.hook_fn_grad)
 
     def hook_fn_act(self, module, input, output):
         self.activations = output

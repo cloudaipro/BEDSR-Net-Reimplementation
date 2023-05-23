@@ -232,6 +232,15 @@ def main() -> None:
                 discriminator.state_dict(),
                 os.path.join(result_path, "pretrained_d_srnet.prm"),
             )
+        # else:
+        #     torch.save(
+        #         generator.state_dict(),
+        #         os.path.join(result_path, "pretrained_g_srnet.prm"),
+        #     )
+        #     torch.save(
+        #         discriminator.state_dict(),
+        #         os.path.join(result_path, "pretrained_d_srnet.prm"),
+        #     )
 
         # save checkpoint every epoch
         save_checkpoint_BEDSRNet(
@@ -296,4 +305,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    torch.multiprocessing.set_sharing_strategy('file_system')
     main()

@@ -57,6 +57,7 @@ class TrainLogger(object):
         )
 
         self.df = self.df.append(tmp, ignore_index=True)
+        # self.df = pd.concat([self.df, tmp], ignore_index=True)
         self._save_log()
 
         logger.info(
@@ -138,6 +139,7 @@ class TrainLoggerBEDSRNet(object):
         )
 
         self.df = self.df.append(tmp, ignore_index=True)
+        # self.df = pd.concat([self.df, tmp], ignore_index=True)
         self._save_log()
 
         logger.info(
@@ -147,3 +149,8 @@ class TrainLoggerBEDSRNet(object):
             f"train psnr: {train_d_loss:.4f}\tval psnr: {val_d_loss:.4f}\t"
             f"train ssim: {train_d_loss:.4f}\tval ssim: {val_d_loss:.4f}\t"
         )
+        print(f"epoch: {epoch}\tepoch time[sec]: {train_time + val_time}\tlr: {lrG}\t"
+            f"train g loss: {train_g_loss:.4f}\tval g loss: {val_g_loss:.4f}\t"
+            f"train d loss: {train_d_loss:.4f}\tval d loss: {val_d_loss:.4f}\t"
+            f"train psnr: {train_d_loss:.4f}\tval psnr: {val_d_loss:.4f}\t"
+            f"train ssim: {train_d_loss:.4f}\tval ssim: {val_d_loss:.4f}\t")

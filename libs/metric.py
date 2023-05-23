@@ -28,6 +28,8 @@ def calc_ssim(gts: List[np.ndarray], preds: List[np.ndarray]) -> float:
                 gt.transpose([1, 2, 0]) * 0.5 + 0.5,
                 pred.transpose([1, 2, 0]) * 0.5 + 0.5,
                 multichannel=True,
+                win_size=3,  # alex added
+                data_range=2.0  # alex added
             ),
         )
 
