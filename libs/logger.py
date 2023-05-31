@@ -64,7 +64,10 @@ class TrainLogger(object):
             f"epoch: {epoch}\tepoch time[sec]: {train_time + val_time}\tlr: {lr}\t"
             f"train loss: {train_loss:.4f}\tval loss: {val_loss:.4f}\t"
         )
-
+        print(
+            f"epoch: {epoch}\tepoch time[sec]: {train_time + val_time}\tlr: {lr}\t"
+            f"train loss: {train_loss:.4f}\tval loss: {val_loss:.4f}\t"
+        )
 
 class TrainLoggerBEDSRNet(object):
     def __init__(self, log_path: str, resume: bool) -> None:
