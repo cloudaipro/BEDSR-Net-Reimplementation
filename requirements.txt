@@ -1,0 +1,7 @@
+torch
+torchvision
+pandas
+accelerate
+opencv-python
+wandb
+albumentations 
