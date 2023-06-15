@@ -1,7 +1,9 @@
-torch
-torchvision
+torch==1.7.1
+torchvision==0.8.2
 pandas
 accelerate
 opencv-python
 wandb
 albumentations 
+grad-cam==1.4.6
+
