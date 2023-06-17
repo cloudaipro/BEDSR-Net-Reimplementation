@@ -19,6 +19,8 @@ def get_criterion(
         criterion = nn.L1Loss().to(device)
     elif loss_function_name == "GAN":
         criterion = [nn.L1Loss().to(device), nn.BCEWithLogitsLoss().to(device)]
+    elif loss_function_name == "L2":
+    		criterion = nn.MSELoss().to(device)
     else:
         criterion = nn.L1Loss().to(device)
 

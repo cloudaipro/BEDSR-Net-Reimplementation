@@ -22,6 +22,8 @@ def weights_init(init_type="gaussian") -> Callable:
                 nn.init.xavier_normal_(m.weight, gain=math.sqrt(2))
             elif init_type == "kaiming":
                 nn.init.kaiming_normal_(m.weight, a=0, mode="fan_in")
+            elif init_type == "He initialization":
+                nn.init.kaiming_uniform_(m.weight, a=0, mode="fan_in")
             elif init_type == "orthogonal":
                 nn.init.orthogonal_(m.weight, gain=math.sqrt(2))
             elif init_type == "default":
@@ -43,8 +45,10 @@ class BENet(nn.Module):
             nn.Conv2d(32, 128, kernel_size=3, padding=1),
             nn.Conv2d(128, 128, kernel_size=3, padding=1),
         )
+        # self.features.apply(weights_init("He initialization"))
         self.global_maxpool = nn.AdaptiveMaxPool2d((1, 1))
         self.classifier = nn.Sequential(nn.Linear(128, out_channels), nn.Tanh())
+        # self.classifier.apply(weights_init("He initialization"))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)

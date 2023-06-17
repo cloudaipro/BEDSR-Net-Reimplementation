@@ -91,9 +91,11 @@ def do_one_iteration(
         cams = []
         back_grounds = []
         for i in range(batch_size):
-            # color, cam, _ = benet(x[i].unsqueeze(dim=0))
-            color = benet(x[i].unsqueeze(dim=0))
-            cam = torch.from_numpy(grad_cam(x[i].unsqueeze(dim=0))).unsqueeze(dim=0)
+            if grad_cam is None:
+                color, cam, _ = benet(x[i].unsqueeze(dim=0))
+            else:
+                color = benet(x[i].unsqueeze(dim=0))
+                cam = torch.from_numpy(grad_cam(x[i].unsqueeze(dim=0))).unsqueeze(dim=0)
             cam = (cam - 0.5) / 0.5  # clamp [-1.0, 1.0]
             cam = torch.nan_to_num(cam, nan=0.0)
             cams.append(cam.detach())
