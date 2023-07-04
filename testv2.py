@@ -1,5 +1,6 @@
 import cv2
 import os
+import time
 import torch
 from albumentations import Compose, Normalize, Resize
 from albumentations.pytorch import ToTensorV2
@@ -10,8 +11,8 @@ from utils.visualize import visualize, reverse_normalize
 from libs.models import models
 from libs.models.models import Generator, BENet
 from libs.models.fix_weight_dict import fix_model_state_dict
-# from libs.models.cam import  GradCAM
-from pytorch_grad_cam import GradCAM
+from libs.models.cam import GradCAM
+# from pytorch_grad_cam import GradCAM
 def convert_show_image(tensor, idx=None):
     if tensor.shape[1]==3:
         img = reverse_normalize(tensor, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
@@ -33,8 +34,8 @@ results_path = './results'
 # image = cv2.imread("./IMG_4750.JPG")   #  "./rect_5.jpg")
 # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 # h, w, c = image.shape
-m_h = 1024
-m_w = 768
+m_h = 1280
+m_w = 960
 test_transform = Compose([Resize(m_h, m_w), Normalize(mean=(0.5, 0.5,0.5), std=(0.5, 0.5,0.5)), ToTensorV2()])
 
 device = 'cpu'  # get_device(allow_only_gpu=False)
@@ -45,14 +46,14 @@ state_dict = torch.load("./pretrained/pretrained_benet.prm", map_location=torch.
 model.load_state_dict(fix_model_state_dict(state_dict))
 model.eval()
 # use WrapedGradCAM
-# target_layer = model.features[3]
-# benet = GradCAM(model, target_layer)
+target_layer = model.features[3]
+benet = GradCAM(model, target_layer)
 
 # use GradCAM
-benet = model
-target_layers = [benet.features[3]]
-grad_cam = GradCAM(model=benet, target_layers=target_layers,
-                   use_cuda=(True if device == "cuda" else False))  # alex use_cuda=False)
+# benet = model
+# target_layers = [benet.features[3]]
+# grad_cam = GradCAM(model=benet, target_layers=target_layers,
+#                    use_cuda=(True if device == "cuda" else False))  # alex use_cuda=False)
 
 # srnet = get_model('srnet', pretrained=True)
 # generator, discriminator = srnet[0].to(torch.device(device)), srnet[1].to(torch.device(device))
@@ -75,9 +76,11 @@ for i, d in enumerate(demodata):
     tensor = test_transform(image=image)
     tensor = tensor['image'].unsqueeze(0).to(device)
 
-    # color, attmap, _ = benet(tensor)
-    color = benet(tensor)
-    attmap = torch.from_numpy(grad_cam(tensor)).unsqueeze(dim=0)
+    start = time.time()
+    color, attmap, _ = benet(tensor)
+    # color = benet(tensor)
+    # attmap = torch.from_numpy(grad_cam(tensor)).unsqueeze(dim=0)
+
 
     attmap = (attmap-0.5)/0.5
 
@@ -92,6 +95,8 @@ for i, d in enumerate(demodata):
         back_ground = back_ground.detach().cpu()
         # shadow_removal_image = generator(input).detach().cpu()
         shadow_removal_image = convert_show_image(generator(input).detach().cpu().clone().numpy())
+
+    print(int(time.time() - start))
 
     cv2.imwrite(os.path.join(results_path, 'r_' + d), cv2.cvtColor(shadow_removal_image, cv2.COLOR_RGB2BGR))
 
